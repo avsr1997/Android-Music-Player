@@ -4,6 +4,7 @@ package com.example.ajayveersingh.musicplayer
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.provider.MediaStore
 import android.support.v4.app.Fragment
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -45,7 +46,32 @@ class mainscreen_fragment : Fragment() {
 
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
-
         myactivity=activity
+    }
+
+    fun getSongsfromPhone():ArrayList<Songs>
+    {
+        var arraylist:ArrayList<Songs> = arrayListOf()
+        var contentresolver=myactivity?.contentResolver
+        var songUri=MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        var cursorSong=contentresolver?.query(songUri,null,null,null,null)
+        if(cursorSong!=null && cursorSong.moveToFirst())
+        {
+            val songID=cursorSong.getColumnIndex(MediaStore.Audio.Media._ID)
+            val songTitle=cursorSong.getColumnIndex(MediaStore.Audio.Media.TITLE)
+            val songArtist=cursorSong.getColumnIndex(MediaStore.Audio.Media.ARTIST)
+            val songData=cursorSong.getColumnIndex(MediaStore.Audio.Media.DATA)
+            val songDate=cursorSong.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED)
+            while(cursorSong.moveToNext())
+            {
+                var currentId=cursorSong.getLong(songID)
+                var currentTitle=cursorSong.getString(songTitle)
+                var currentArtist=cursorSong.getString(songArtist)
+                var currentData=cursorSong.getString(songData)
+                var currentDate=cursorSong.getLong(songDate)
+                arraylist.add(Songs(currentId,currentTitle,currentArtist,currentData,currentDate))
+            }
+        }
+        return arraylist
     }
 }
