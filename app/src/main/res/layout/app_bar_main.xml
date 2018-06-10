@@ -28,7 +28,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/appbar"
-        android:id="@+id/fragment"/>
+        android:id="@+id/fragment"
+        class="com.example.ajayveersingh.musicplayer.mainscreen_fragment"/>
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

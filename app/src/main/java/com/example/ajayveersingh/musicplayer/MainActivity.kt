@@ -7,6 +7,9 @@ import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
@@ -28,8 +31,13 @@ class MainActivity : AppCompatActivity()
 
         val toggle=ActionBarDrawerToggle(this@MainActivity,drawer_layout,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close)
         toggle.syncState()
+        drawer_layout?.addDrawerListener(toggle)
 
         var mainscreenfragment=mainscreen_fragment()
         this.supportFragmentManager.beginTransaction().add(R.id.fragment,mainscreenfragment,"MainScreenFragment").commit()
+
+        var recycler_view=findViewById<RecyclerView>(R.id.recycler_view)
+        recycler_view.layoutManager=LinearLayoutManager(this)
+        recycler_view.itemAnimator=DefaultItemAnimator()
     }
 }
