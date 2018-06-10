@@ -30,6 +30,6 @@ class MainActivity : AppCompatActivity()
         toggle.syncState()
 
         var mainscreenfragment=mainscreen_fragment()
-        this.supportFragmentManager.beginTransaction().add(this@MainActivity,mainscreenfragment,"MainScreenFragment").commit()
+        this.supportFragmentManager.beginTransaction().add(R.id.fragment,mainscreenfragment,"MainScreenFragment").commit()
     }
 }
