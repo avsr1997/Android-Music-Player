@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 
-class navAdapter(_contentList:ArrayList<String>,_getImages:IntArray,_context:Context):RecyclerView.Adapter<navAdapter.navViewholder>()
+class navAdapter(_contentList: ArrayList<String>?, _getImages: IntArray?, _context:Context):RecyclerView.Adapter<navAdapter.navViewholder>()
 {
     var contentList:ArrayList<String>?=null
     var getImages:IntArray?=null
@@ -29,7 +29,7 @@ class navAdapter(_contentList:ArrayList<String>,_getImages:IntArray,_context:Con
 
     override fun getItemCount(): Int
     {
-
+        return contentList?.size as Int
     }
 
     override fun onBindViewHolder(holder: navViewholder, position: Int)

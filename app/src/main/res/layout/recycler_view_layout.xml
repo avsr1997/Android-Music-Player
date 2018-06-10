@@ -8,19 +8,22 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/recycler_id">
+        android:id="@+id/recycler_id"
+        android:padding="8dp">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/image1"
             android:layout_marginLeft="13dp"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#212121"
             android:layout_toRightOf="@+id/image1"
-            android:id="@+id/tv1"/>
+            android:id="@+id/tv1"
+            android:layout_marginLeft="10dp"/>
 
     </RelativeLayout>
 
