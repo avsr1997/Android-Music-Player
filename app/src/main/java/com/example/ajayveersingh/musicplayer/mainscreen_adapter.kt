@@ -1,6 +1,8 @@
 package com.example.ajayveersingh.musicplayer
 
 import android.content.Context
+import android.os.Bundle
+import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -39,8 +41,17 @@ class mainscreen_adapter(_songDetails: ArrayList<Songs>, _context: Context) : Re
         var songObject = songDetails?.get(position)
         holder.track_title?.text = songObject?.songTitle
         holder.track_artist?.text = songObject?.artist
+        var args = Bundle()
+        args.putString("songArtist", songObject?.artist)
+        args.putString("path", songObject?.songData)
+        args.putString("songTitle", songObject?.songTitle)
+        args.putInt("songId", songObject?.songID?.toInt() as Int)
+        args.putInt("songPosition", position)
+        args.putParcelableArrayList("songData", songDetails)
         holder.contentHolder?.setOnClickListener({
-            Toast.makeText(mcontext, songObject?.songTitle, Toast.LENGTH_SHORT).show()
+            val songplayingfragment = songplaying_fragment()
+            (mcontext as FragmentActivity).supportFragmentManager.beginTransaction().replace(R.id.fragment, songplayingfragment).commit()
+
         })
     }
 
