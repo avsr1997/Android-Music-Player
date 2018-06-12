@@ -48,8 +48,10 @@ class mainscreen_adapter(_songDetails: ArrayList<Songs>, _context: Context) : Re
         args.putInt("songId", songObject?.songID?.toInt() as Int)
         args.putInt("songPosition", position)
         args.putParcelableArrayList("songData", songDetails)
+
         holder.contentHolder?.setOnClickListener({
             val songplayingfragment = songplaying_fragment()
+            songplayingfragment.arguments = args
             (mcontext as FragmentActivity).supportFragmentManager.beginTransaction().replace(R.id.fragment, songplayingfragment).commit()
 
         })
