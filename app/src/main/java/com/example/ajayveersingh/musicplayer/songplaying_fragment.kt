@@ -53,6 +53,11 @@ class songplaying_fragment : Fragment() {
 
     }
 
+    object static {
+        var myshuffle: String = "data_shuffle"
+        var myloop: String = "data_loop"
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -122,6 +127,12 @@ class songplaying_fragment : Fragment() {
         onsongComplete()
         var visualizationhandler = DbmHandler.Factory.newVisualizerHandler(myactivity as Context, 0)
         audioVisualization?.linkTo(visualizationhandler)
+
+        var for_shuffle = myactivity?.getSharedPreferences(static.myshuffle, Context.MODE_PRIVATE)
+        for_shuffle?.getBoolean("value", false)
+
+        var for_loop = myactivity?.getSharedPreferences(static.myshuffle, Context.MODE_PRIVATE)
+        for_loop?.getBoolean("value", false)
     }
 
     override fun onResume() {
@@ -160,22 +171,32 @@ class songplaying_fragment : Fragment() {
             previous_song()
         })
         shuffleButton?.setOnClickListener({
+            var edit_shuffle = myactivity?.getSharedPreferences(static.myshuffle, Context.MODE_PRIVATE)?.edit()
+
             if (myhelper.isshuffle as Boolean) {
                 myhelper.isshuffle = true
                 shuffleButton?.setBackgroundResource(R.drawable.shuffle_icon)
+                edit_shuffle?.putBoolean("value", true)
+                edit_shuffle?.apply()
             } else {
                 myhelper.isshuffle = false
                 shuffleButton?.setBackgroundResource((R.drawable.shuffle_white_icon))
+                edit_shuffle?.putBoolean("value", false)
             }
 
         })
         loop_button?.setOnClickListener({
+            var edit_loop = myactivity?.getSharedPreferences(static.myloop, Context.MODE_PRIVATE)?.edit()
             if (myhelper.isloop as Boolean) {
                 myhelper.isloop = true
                 loop_button?.setBackgroundResource(R.drawable.shuffle_icon)
+                edit_loop?.putBoolean("value", true)
+                edit_loop?.apply()
             } else {
                 myhelper.isloop = false
                 loop_button?.setBackgroundResource(R.drawable.loop_white_icon)
+                edit_loop?.putBoolean("value", false)
+                edit_loop?.apply()
             }
 
         })
