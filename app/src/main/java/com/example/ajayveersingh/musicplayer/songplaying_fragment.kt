@@ -41,6 +41,8 @@ class songplaying_fragment : Fragment() {
     var songDetails: ArrayList<Songs>? = null
     var audioVisualization: AudioVisualization? = null
     var glview: GLAudioVisualizationView? = null
+    var fb: ImageButton? = null
+    var fav_database: favorite_database? = null
     var updatesongtime = object : Runnable {
         override fun run() {
             var getcurrent = mediaPlayer?.currentPosition
@@ -73,6 +75,8 @@ class songplaying_fragment : Fragment() {
         songartist = view?.findViewById(R.id.songArtist)
         seekbar = view?.findViewById(R.id.seekbar)
         glview = view?.findViewById(R.id.visualizer_view)
+        fb = view?.findViewById(R.id.favorites)
+        fav_database = favorite_database(myactivity)
     }
 
     override fun onAttach(context: Context?) {
@@ -133,6 +137,12 @@ class songplaying_fragment : Fragment() {
 
         var for_loop = myactivity?.getSharedPreferences(static.myshuffle, Context.MODE_PRIVATE)
         for_loop?.getBoolean("value", false)
+
+        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
+            fb?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fb?.setBackgroundResource((R.drawable.favorite_off))
+        }
     }
 
     override fun onResume() {
@@ -151,6 +161,16 @@ class songplaying_fragment : Fragment() {
     }
 
     fun clickhandler() {
+
+        fb?.setOnClickListener({
+            if (fav_database?.checkidexists(myhelper.nowsongID.toInt()) as Boolean) {
+                fav_database?.deletesong_database(myhelper.nowsongID as Int)
+                fb?.setBackgroundResource(R.drawable.favorite_off)
+            } else {
+                fav_database?.storefavoritesong(myhelper.nowsongID as Int, myhelper.nowartist, myhelper.nowsongpath, myhelper.nowsongtitle)
+                fb?.setBackgroundResource(R.drawable.favorite_on)
+            }
+        })
         playpause_button?.setOnClickListener({
             if (mediaPlayer?.isPlaying as Boolean) {
                 mediaPlayer?.pause()
@@ -230,6 +250,11 @@ class songplaying_fragment : Fragment() {
             e.printStackTrace()
         }
         updatetextviews(myhelper.nowsongtitle as String, myhelper.nowartist as String)
+        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
+            fb?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fb?.setBackgroundResource((R.drawable.favorite_off))
+        }
     }
 
     fun previous_song() {
@@ -253,6 +278,11 @@ class songplaying_fragment : Fragment() {
             e.printStackTrace()
         }
         updatetextviews(myhelper.nowsongtitle as String, myhelper.nowartist as String)
+        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
+            fb?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fb?.setBackgroundResource((R.drawable.favorite_off))
+        }
 
     }
 
@@ -263,6 +293,11 @@ class songplaying_fragment : Fragment() {
             nextsong("Normal Next")
         }
         processinformation(mediaPlayer as MediaPlayer)
+        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
+            fb?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fb?.setBackgroundResource((R.drawable.favorite_off))
+        }
     }
 
     fun updatetextviews(name: String, artist: String) {
@@ -283,6 +318,7 @@ class songplaying_fragment : Fragment() {
 
         seekbar?.setProgress(start_time)
         Handler().postDelayed(updatesongtime, 1000)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
