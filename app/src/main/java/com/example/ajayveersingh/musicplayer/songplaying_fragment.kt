@@ -3,6 +3,8 @@ package com.example.ajayveersingh.musicplayer
 
 import android.app.Activity
 import android.content.Context
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -48,6 +50,9 @@ class songplaying_fragment : Fragment() {
         var glview: GLAudioVisualizationView? = null
         var fb: ImageButton? = null
         var fav_database: favorite_database? = null
+        var msensorManager: SensorManager? = null
+        var msensorListener: SensorEventListener? = null
+
         var updatesongtime = object : Runnable {
             override fun run() {
                 var getcurrent = static.mediaPlayer?.currentPosition
@@ -235,6 +240,11 @@ class songplaying_fragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         static.audioVisualization?.release()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
     }
 
     fun clickhandler() {
