@@ -19,64 +19,141 @@ import android.widget.TextView
 import com.cleveroad.audiovisualization.AudioVisualization
 import com.cleveroad.audiovisualization.DbmHandler
 import com.cleveroad.audiovisualization.GLAudioVisualizationView
+import com.example.ajayveersingh.musicplayer.songplaying_fragment.static.myactivity
+import com.example.ajayveersingh.musicplayer.songplaying_fragment.static.songPosition
 import kotlinx.android.synthetic.main.fragment_songplaying_fragment.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class songplaying_fragment : Fragment() {
-    var startTime: TextView? = null
-    var endTime: TextView? = null
-    var playpause_button: ImageButton? = null
-    var previous_button: ImageButton? = null
-    var next_button: ImageButton? = null
-    var loop_button: ImageButton? = null
-    var shuffleButton: ImageButton? = null
-    var song_Title: TextView? = null
-    var songartist: TextView? = null
-    var seekbar: SeekBar? = null
-    var myhelper = helper()
-    var myactivity: Activity? = null
-    var mediaPlayer: MediaPlayer? = null
-    var songPosition: Int = 0
-    var songDetails: ArrayList<Songs>? = null
-    var audioVisualization: AudioVisualization? = null
-    var glview: GLAudioVisualizationView? = null
-    var fb: ImageButton? = null
-    var fav_database: favorite_database? = null
-    var updatesongtime = object : Runnable {
-        override fun run() {
-            var getcurrent = mediaPlayer?.currentPosition
-            startTime?.setText(String.format("%d:%d",
-                    TimeUnit.MILLISECONDS.toMinutes(getcurrent?.toLong() as Long),
-                    TimeUnit.MILLISECONDS.toSeconds(getcurrent?.toLong() as Long)))
-            seekbar?.setProgress(getcurrent?.toInt() as Int)
-            Handler().postDelayed(this, 1000)
-        }
-
-    }
 
     object static {
+
+        var startTime: TextView? = null
+        var endTime: TextView? = null
+        var playpause_button: ImageButton? = null
+        var previous_button: ImageButton? = null
+        var next_button: ImageButton? = null
+        var loop_button: ImageButton? = null
+        var shuffleButton: ImageButton? = null
+        var song_Title: TextView? = null
+        var songartist: TextView? = null
+        var seekbar: SeekBar? = null
+        var myhelper = helper()
+        var myactivity: Activity? = null
+        var mediaPlayer: MediaPlayer? = null
+        var songPosition: Int = 0
+        var songDetails: ArrayList<Songs>? = null
+        var audioVisualization: AudioVisualization? = null
+        var glview: GLAudioVisualizationView? = null
+        var fb: ImageButton? = null
+        var fav_database: favorite_database? = null
+        var updatesongtime = object : Runnable {
+            override fun run() {
+                var getcurrent = static.mediaPlayer?.currentPosition
+                static.startTime?.setText(String.format("%d:%d",
+                        TimeUnit.MILLISECONDS.toMinutes(getcurrent?.toLong() as Long),
+                        TimeUnit.MILLISECONDS.toSeconds(getcurrent?.toLong() as Long)))
+                seekbar?.setProgress(getcurrent?.toInt() as Int)
+                Handler().postDelayed(this, 1000)
+            }
+
+        }
+    }
+
+
+    object stat {
         var myshuffle: String = "data_shuffle"
         var myloop: String = "data_loop"
+        fun updatetextviews(name: String, artist: String) {
+            static.song_Title?.setText(name)
+            static.songartist?.setText(artist)
+        }
+
+        fun processinformation(mediaPlayer: MediaPlayer) {
+            val final_time = mediaPlayer.duration
+            val start_time = mediaPlayer.currentPosition
+            static.seekbar?.max = final_time
+            static.startTime?.setText(String.format("%d:%d",
+                    TimeUnit.MILLISECONDS.toMinutes(start_time.toLong()),
+                    TimeUnit.MILLISECONDS.toSeconds(final_time.toLong())))
+            static.endTime?.setText(String.format("%d:%d",
+                    TimeUnit.MILLISECONDS.toMinutes(start_time.toLong()),
+                    TimeUnit.MILLISECONDS.toSeconds(final_time.toLong())))
+
+            static.seekbar?.setProgress(start_time)
+            Handler().postDelayed(static.updatesongtime, 1000)
+
+        }
+
+        fun onsongComplete() {
+            if (static.myhelper.isloop as Boolean) {
+                nextsong("Shuffle Next")
+            } else {
+                nextsong("Normal Next")
+            }
+            processinformation(static.mediaPlayer as MediaPlayer)
+            if (static.fav_database?.checkidexists(static.myhelper.nowsongID as Int) as Boolean) {
+                static.fb?.setBackgroundResource(R.drawable.favorite_on)
+            } else {
+                static.fb?.setBackgroundResource((R.drawable.favorite_off))
+            }
+        }
+
+        fun nextsong(check: String) {
+            if (check.equals("Normal Next")) {
+                songPosition += 1
+
+            } else if (check.equals("Shuffle Next")) {
+                var random = Random()
+                var randomposition = random.nextInt(static.songDetails?.size?.plus(1) as Int)
+                songPosition = randomposition
+            }
+            if (songPosition == static.songDetails?.size) {
+                songPosition = 0
+            }
+            var nextsong = static.songDetails?.get(songPosition)
+            static.myhelper.nowsongpath = nextsong?.songData
+            static.myhelper.nowartist = nextsong?.artist
+            static.myhelper.nowsongID = nextsong?.songID!!
+            static.myhelper.nowsongtitle = nextsong?.songTitle
+            static.myhelper.nowposition = songPosition
+            static.mediaPlayer?.reset()
+            try {
+                static.mediaPlayer?.setDataSource(myactivity, Uri.parse(static.myhelper.nowsongpath))
+                static.mediaPlayer?.prepare()
+                static.mediaPlayer?.start()
+                processinformation(static.mediaPlayer as MediaPlayer)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            updatetextviews(static.myhelper.nowsongtitle as String, static.myhelper.nowartist as String)
+            if (static.fav_database?.checkidexists(static.myhelper.nowsongID as Int) as Boolean) {
+                static.fb?.setBackgroundResource(R.drawable.favorite_on)
+            } else {
+                static.fb?.setBackgroundResource((R.drawable.favorite_off))
+            }
+        }
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_songplaying_fragment, container, false)
-        startTime = view?.findViewById(R.id.start_time)
-        endTime = view?.findViewById(R.id.end_time)
-        playpause_button = view?.findViewById(R.id.playpause_button)
-        previous_button = view?.findViewById(R.id.previousbutton)
-        next_button = view?.findViewById(R.id.next_button)
-        loop_button = view?.findViewById(R.id.loop_button)
-        shuffleButton = view?.findViewById(R.id.shuffle_button)
-        songTitle = view?.findViewById(R.id.songTitle)
-        songartist = view?.findViewById(R.id.songArtist)
-        seekbar = view?.findViewById(R.id.seekbar)
-        glview = view?.findViewById(R.id.visualizer_view)
-        fb = view?.findViewById(R.id.favorites)
-        fav_database = favorite_database(myactivity)
+        static.startTime = view?.findViewById(R.id.start_time)
+        static.endTime = view?.findViewById(R.id.end_time)
+        static.playpause_button = view?.findViewById(R.id.playpause_button)
+        static.previous_button = view?.findViewById(R.id.previousbutton)
+        static.next_button = view?.findViewById(R.id.next_button)
+        static.loop_button = view?.findViewById(R.id.loop_button)
+        static.shuffleButton = view?.findViewById(R.id.shuffle_button)
+        static.song_Title = view?.findViewById(R.id.songTitle)
+        static.songartist = view?.findViewById(R.id.songArtist)
+        static.seekbar = view?.findViewById(R.id.seekbar)
+        static.glview = view?.findViewById(R.id.visualizer_view)
+        static.fb = view?.findViewById(R.id.favorites)
+        static.fav_database = favorite_database(myactivity)
     }
 
     override fun onAttach(context: Context?) {
@@ -91,9 +168,9 @@ class songplaying_fragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
 
-        myhelper.isplaying = true
-        myhelper.isloop = false
-        myhelper.isshuffle = false
+        static.myhelper.isplaying = true
+        static.myhelper.isloop = false
+        static.myhelper.isshuffle = false
         super.onActivityCreated(savedInstanceState)
         var path: String? = null
         var _songTitle: String? = null
@@ -105,115 +182,115 @@ class songplaying_fragment : Fragment() {
             _songTitle = arguments?.getString("songTitle")
             _songArtist = arguments?.getString("songA rtist")
             songId = arguments?.getInt("songId")!!.toLong()
-            songPosition = arguments?.getInt("songPosition")!!
-            songDetails = arguments?.getParcelableArrayList("songData")
-            myhelper.nowsongpath = path
-            myhelper.nowartist = _songArtist
-            myhelper.nowsongID = songId
-            myhelper.nowsongtitle = _songTitle
-            myhelper.nowposition = songPosition
+            static.songPosition = arguments?.getInt("songPosition")!!
+            static.songDetails = arguments?.getParcelableArrayList("songData")
+            static.myhelper.nowsongpath = path
+            static.myhelper.nowartist = _songArtist
+            static.myhelper.nowsongID = songId
+            static.myhelper.nowsongtitle = _songTitle
+            static.myhelper.nowposition = songPosition
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        mediaPlayer = MediaPlayer()
-        mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
+        static.mediaPlayer = MediaPlayer()
+        static.mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
         try {
-            mediaPlayer?.setDataSource(myactivity, Uri.parse(path))
-            mediaPlayer?.prepare()
+            static.mediaPlayer?.setDataSource(myactivity, Uri.parse(path))
+            static.mediaPlayer?.prepare()
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        mediaPlayer?.start()
-        processinformation(mediaPlayer as MediaPlayer)
+        static.mediaPlayer?.start()
+        stat.processinformation(static.mediaPlayer as MediaPlayer)
         clickhandler()
-        onsongComplete()
+        stat.onsongComplete()
         var visualizationhandler = DbmHandler.Factory.newVisualizerHandler(myactivity as Context, 0)
-        audioVisualization?.linkTo(visualizationhandler)
+        static.audioVisualization?.linkTo(visualizationhandler)
 
-        var for_shuffle = myactivity?.getSharedPreferences(static.myshuffle, Context.MODE_PRIVATE)
+        var for_shuffle = myactivity?.getSharedPreferences(stat.myshuffle, Context.MODE_PRIVATE)
         for_shuffle?.getBoolean("value", false)
 
-        var for_loop = myactivity?.getSharedPreferences(static.myshuffle, Context.MODE_PRIVATE)
+        var for_loop = myactivity?.getSharedPreferences(stat.myshuffle, Context.MODE_PRIVATE)
         for_loop?.getBoolean("value", false)
 
-        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
-            fb?.setBackgroundResource(R.drawable.favorite_on)
+        if (static.fav_database?.checkidexists(static.myhelper.nowsongID as Int) as Boolean) {
+            static.fb?.setBackgroundResource(R.drawable.favorite_on)
         } else {
-            fb?.setBackgroundResource((R.drawable.favorite_off))
+            static.fb?.setBackgroundResource((R.drawable.favorite_off))
         }
     }
 
     override fun onResume() {
         super.onResume()
-        audioVisualization?.onResume()
+        static.audioVisualization?.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        audioVisualization?.onPause()
+        static.audioVisualization?.onPause()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        audioVisualization?.release()
+        static.audioVisualization?.release()
     }
 
     fun clickhandler() {
 
-        fb?.setOnClickListener({
-            if (fav_database?.checkidexists(myhelper.nowsongID.toInt()) as Boolean) {
-                fav_database?.deletesong_database(myhelper.nowsongID as Int)
-                fb?.setBackgroundResource(R.drawable.favorite_off)
+        static.fb?.setOnClickListener({
+            if (static.fav_database?.checkidexists(static.myhelper.nowsongID.toInt()) as Boolean) {
+                static.fav_database?.deletesong_database(static.myhelper.nowsongID as Int)
+                static.fb?.setBackgroundResource(R.drawable.favorite_off)
             } else {
-                fav_database?.storefavoritesong(myhelper.nowsongID as Int, myhelper.nowartist, myhelper.nowsongpath, myhelper.nowsongtitle)
-                fb?.setBackgroundResource(R.drawable.favorite_on)
+                static.fav_database?.storefavoritesong(static.myhelper.nowsongID as Int, static.myhelper.nowartist, static.myhelper.nowsongpath, static.myhelper.nowsongtitle)
+                static.fb?.setBackgroundResource(R.drawable.favorite_on)
             }
         })
         playpause_button?.setOnClickListener({
-            if (mediaPlayer?.isPlaying as Boolean) {
-                mediaPlayer?.pause()
+            if (static.mediaPlayer?.isPlaying as Boolean) {
+                static.mediaPlayer?.pause()
                 playpause_button?.setBackgroundResource(R.drawable.play_icon)
             } else {
-                mediaPlayer?.start()
+                static.mediaPlayer?.start()
                 playpause_button?.setBackgroundResource(R.drawable.pause_icon)
             }
         })
         next_button?.setOnClickListener({
-            if (myhelper.isshuffle as Boolean) {
-                nextsong("Normal Next")
+            if (static.myhelper.isshuffle as Boolean) {
+                stat.nextsong("Normal Next")
             } else {
-                nextsong("Shuffle Next")
+                stat.nextsong("Shuffle Next")
             }
         })
-        previous_button?.setOnClickListener({
+        static.previous_button?.setOnClickListener({
             previous_song()
         })
-        shuffleButton?.setOnClickListener({
-            var edit_shuffle = myactivity?.getSharedPreferences(static.myshuffle, Context.MODE_PRIVATE)?.edit()
+        static.shuffleButton?.setOnClickListener({
+            var edit_shuffle = myactivity?.getSharedPreferences(stat.myshuffle, Context.MODE_PRIVATE)?.edit()
 
-            if (myhelper.isshuffle as Boolean) {
-                myhelper.isshuffle = true
-                shuffleButton?.setBackgroundResource(R.drawable.shuffle_icon)
+            if (static.myhelper.isshuffle as Boolean) {
+                static.myhelper.isshuffle = true
+                static.shuffleButton?.setBackgroundResource(R.drawable.shuffle_icon)
                 edit_shuffle?.putBoolean("value", true)
                 edit_shuffle?.apply()
             } else {
-                myhelper.isshuffle = false
-                shuffleButton?.setBackgroundResource((R.drawable.shuffle_white_icon))
+                static.myhelper.isshuffle = false
+                static.shuffleButton?.setBackgroundResource((R.drawable.shuffle_white_icon))
                 edit_shuffle?.putBoolean("value", false)
             }
 
         })
         loop_button?.setOnClickListener({
-            var edit_loop = myactivity?.getSharedPreferences(static.myloop, Context.MODE_PRIVATE)?.edit()
-            if (myhelper.isloop as Boolean) {
-                myhelper.isloop = true
+            var edit_loop = myactivity?.getSharedPreferences(stat.myloop, Context.MODE_PRIVATE)?.edit()
+            if (static.myhelper.isloop as Boolean) {
+                static.myhelper.isloop = true
                 loop_button?.setBackgroundResource(R.drawable.shuffle_icon)
                 edit_loop?.putBoolean("value", true)
                 edit_loop?.apply()
             } else {
-                myhelper.isloop = false
+                static.myhelper.isloop = false
                 loop_button?.setBackgroundResource(R.drawable.loop_white_icon)
                 edit_loop?.putBoolean("value", false)
                 edit_loop?.apply()
@@ -222,107 +299,38 @@ class songplaying_fragment : Fragment() {
         })
     }
 
-    fun nextsong(check: String) {
-        if (check.equals("Normal Next")) {
-            songPosition += 1
-
-        } else if (check.equals("Shuffle Next")) {
-            var random = Random()
-            var randomposition = random.nextInt(songDetails?.size?.plus(1) as Int)
-            songPosition = randomposition
-        }
-        if (songPosition == songDetails?.size) {
-            songPosition = 0
-        }
-        var nextsong = songDetails?.get(songPosition)
-        myhelper.nowsongpath = nextsong?.songData
-        myhelper.nowartist = nextsong?.artist
-        myhelper.nowsongID = nextsong?.songID!!
-        myhelper.nowsongtitle = nextsong?.songTitle
-        myhelper.nowposition = songPosition
-        mediaPlayer?.reset()
-        try {
-            mediaPlayer?.setDataSource(myactivity, Uri.parse(myhelper.nowsongpath))
-            mediaPlayer?.prepare()
-            mediaPlayer?.start()
-            processinformation(mediaPlayer as MediaPlayer)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        updatetextviews(myhelper.nowsongtitle as String, myhelper.nowartist as String)
-        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
-            fb?.setBackgroundResource(R.drawable.favorite_on)
-        } else {
-            fb?.setBackgroundResource((R.drawable.favorite_off))
-        }
-    }
 
     fun previous_song() {
         songPosition -= 1
         if (songPosition == -1) {
             songPosition = 0
         }
-        mediaPlayer?.reset()
-        var nextsong = songDetails?.get(songPosition)
-        myhelper.nowsongpath = nextsong?.songData
-        myhelper.nowartist = nextsong?.artist
-        myhelper.nowsongID = nextsong?.songID!!
-        myhelper.nowsongtitle = nextsong?.songTitle
-        myhelper.nowposition = songPosition
+        static.mediaPlayer?.reset()
+        var nextsong = static.songDetails?.get(songPosition)
+        static.myhelper.nowsongpath = nextsong?.songData
+        static.myhelper.nowartist = nextsong?.artist
+        static.myhelper.nowsongID = nextsong?.songID!!
+        static.myhelper.nowsongtitle = nextsong?.songTitle
+        static.myhelper.nowposition = songPosition
         try {
-            mediaPlayer?.setDataSource(myactivity, Uri.parse(myhelper.nowsongpath))
-            mediaPlayer?.prepare()
-            mediaPlayer?.start()
-            processinformation(mediaPlayer as MediaPlayer)
+            static.mediaPlayer?.setDataSource(myactivity, Uri.parse(static.myhelper.nowsongpath))
+            static.mediaPlayer?.prepare()
+            static.mediaPlayer?.start()
+            stat.processinformation(static.mediaPlayer as MediaPlayer)
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        updatetextviews(myhelper.nowsongtitle as String, myhelper.nowartist as String)
-        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
-            fb?.setBackgroundResource(R.drawable.favorite_on)
+        stat.updatetextviews(static.myhelper.nowsongtitle as String, static.myhelper.nowartist as String)
+        if (static.fav_database?.checkidexists(static.myhelper.nowsongID as Int) as Boolean) {
+            static.fb?.setBackgroundResource(R.drawable.favorite_on)
         } else {
-            fb?.setBackgroundResource((R.drawable.favorite_off))
+            static.fb?.setBackgroundResource((R.drawable.favorite_off))
         }
-
-    }
-
-    fun onsongComplete() {
-        if (myhelper.isloop as Boolean) {
-            nextsong("Shuffle Next")
-        } else {
-            nextsong("Normal Next")
-        }
-        processinformation(mediaPlayer as MediaPlayer)
-        if (fav_database?.checkidexists(myhelper.nowsongID as Int) as Boolean) {
-            fb?.setBackgroundResource(R.drawable.favorite_on)
-        } else {
-            fb?.setBackgroundResource((R.drawable.favorite_off))
-        }
-    }
-
-    fun updatetextviews(name: String, artist: String) {
-        song_Title?.setText(name)
-        songartist?.setText(artist)
-    }
-
-    fun processinformation(mediaPlayer: MediaPlayer) {
-        val final_time = mediaPlayer.duration
-        val start_time = mediaPlayer.currentPosition
-        seekbar?.max = final_time
-        startTime?.setText(String.format("%d:%d",
-                TimeUnit.MILLISECONDS.toMinutes(start_time.toLong()),
-                TimeUnit.MILLISECONDS.toSeconds(final_time.toLong())))
-        endTime?.setText(String.format("%d:%d",
-                TimeUnit.MILLISECONDS.toMinutes(start_time.toLong()),
-                TimeUnit.MILLISECONDS.toSeconds(final_time.toLong())))
-
-        seekbar?.setProgress(start_time)
-        Handler().postDelayed(updatesongtime, 1000)
 
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        audioVisualization = glview as AudioVisualization
+        static.audioVisualization = static.glview as AudioVisualization
     }
 }

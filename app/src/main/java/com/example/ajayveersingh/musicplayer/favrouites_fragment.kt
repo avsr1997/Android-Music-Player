@@ -3,6 +3,7 @@ package com.example.ajayveersingh.musicplayer
 
 import android.app.Activity
 import android.content.Context
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v4.app.Fragment
@@ -27,6 +28,11 @@ class favrouites_fragment : Fragment() {
     var playpausebutton: ImageButton? = null
     var songTitle: TextView? = null
     var recyclerView: RecyclerView? = null
+    var trackposition = 0
+
+    object statified {
+        var mediaplayer: MediaPlayer? = null
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -94,5 +100,52 @@ class favrouites_fragment : Fragment() {
             }
         }
         return arraylist
+    }
+
+    fun bottombar_setup() {
+        bottombar_clickhandler()
+        try {
+            songTitle?.setText(songplaying_fragment.static.myhelper?.nowsongtitle)
+            songplaying_fragment.static.mediaPlayer?.setOnCompletionListener({
+                songTitle?.setText(songplaying_fragment.static.myhelper?.nowsongtitle)
+                songplaying_fragment.stat.onsongComplete()
+            })
+            if (songplaying_fragment.static.mediaPlayer?.isPlaying as Boolean) {
+                bottombar?.visibility = View.VISIBLE
+            } else {
+                bottombar?.visibility = View.VISIBLE
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun bottombar_clickhandler() {
+        statified.mediaplayer = songplaying_fragment.static.mediaPlayer
+        var songplayingfragment = songplaying_fragment()
+        bottombar?.setOnClickListener({
+            var args = Bundle()
+            args.putString("songArtist", songplaying_fragment.static.myhelper?.nowartist)
+            args.putString("path", songplaying_fragment.static.myhelper?.nowartist)
+            args.putString("songTitle", songplaying_fragment.static.myhelper?.nowartist)
+            args.putInt("songId", songplaying_fragment.static.myhelper?.nowsongID as Int)
+            args.putInt("songPosition", songplaying_fragment.static.myhelper?.nowposition)
+            args.putParcelableArrayList("songData", songplaying_fragment.static.songDetails)
+            args.putString("favBottomBar", "Success")
+            fragmentManager?.beginTransaction()
+                    ?.replace(R.id.fragment, songplayingfragment)?.addToBackStack("songplayingfragment")
+                    ?.commit()
+        })
+        playpausebutton?.setOnClickListener({
+            if (songplaying_fragment.static.myhelper?.isplaying as Boolean) {
+                songplaying_fragment.static.mediaPlayer?.pause()
+                trackposition = songplaying_fragment.static.mediaPlayer?.currentPosition as Int
+                playpausebutton?.setBackgroundResource(R.drawable.play_icon)
+            } else {
+                songplaying_fragment.static.mediaPlayer?.seekTo(trackposition)
+                songplaying_fragment.static.mediaPlayer?.start()
+                playpausebutton?.setBackgroundResource(R.drawable.pause_icon)
+            }
+        })
     }
 }
