@@ -3,6 +3,8 @@ package com.example.ajayveersingh.musicplayer
 
 import android.app.Activity
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.media.AudioManager
@@ -12,9 +14,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
 import android.support.v4.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
@@ -28,6 +28,11 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class songplaying_fragment : Fragment() {
+
+    var macceleration: Float = 0f
+    var maccelerationcurrent: Float = 0f
+    var maccelerationlast: Float = 0f
+
 
     object static {
 
@@ -52,6 +57,7 @@ class songplaying_fragment : Fragment() {
         var fav_database: favorite_database? = null
         var msensorManager: SensorManager? = null
         var msensorListener: SensorEventListener? = null
+        var MY_PREFS_NAME = "shake_feature"
 
         var updatesongtime = object : Runnable {
             override fun run() {
@@ -142,6 +148,7 @@ class songplaying_fragment : Fragment() {
 
     }
 
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -230,11 +237,13 @@ class songplaying_fragment : Fragment() {
     override fun onResume() {
         super.onResume()
         static.audioVisualization?.onResume()
+        static.msensorManager?.registerListener(static.msensorListener, static.msensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun onPause() {
         super.onPause()
         static.audioVisualization?.onPause()
+        static.msensorManager?.unregisterListener(static.msensorListener)
     }
 
     override fun onDestroyView() {
@@ -244,7 +253,34 @@ class songplaying_fragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        static.msensorManager = static.myactivity?.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        macceleration = 0.0f
+        maccelerationcurrent = SensorManager.GRAVITY_EARTH
+        maccelerationlast = SensorManager.GRAVITY_EARTH
+        bindshake_listener()
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        menu?.clear()
+        inflater?.inflate(R.menu.song_playing_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?) {
+        super.onPrepareOptionsMenu(menu)
+        val item: MenuItem? = menu?.findItem(R.id.action_redirect)
+        item?.isVisible = true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.action_redirect -> {
+                static.myactivity?.onBackPressed()
+                return false
+            }
+        }
+        return false
     }
 
     fun clickhandler() {
@@ -342,5 +378,34 @@ class songplaying_fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         static.audioVisualization = static.glview as AudioVisualization
+    }
+
+    fun bindshake_listener() {
+        static.msensorListener = object : SensorEventListener {
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+            }
+
+            override fun onSensorChanged(event: SensorEvent) {
+                val x = event.values[0]
+                val y = event.values[1]
+                val z = event.values[2]
+
+                maccelerationlast = maccelerationcurrent
+                maccelerationcurrent = Math.sqrt(((x * x + y * y + z * z).toDouble())).toFloat()
+                val delta = maccelerationcurrent - maccelerationlast
+                macceleration = macceleration * 0.9f + delta
+
+                if (macceleration > 12) {
+                    var myprefs = myactivity?.getSharedPreferences(static.MY_PREFS_NAME, Context.MODE_PRIVATE)
+                    val isAllowed = myprefs?.getBoolean("featrue", false)
+                    if (isAllowed as Boolean) {
+                        stat.nextsong("PlaynextNormal")
+                    }
+
+                }
+            }
+
+        }
     }
 }

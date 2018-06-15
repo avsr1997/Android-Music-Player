@@ -9,9 +9,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageButton
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -37,6 +35,24 @@ class mainscreen_fragment : Fragment() {
         recyclerView = view?.findViewById(R.id.all_songs_view)
 
         return view
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        menu?.clear()
+        inflater?.inflate(R.menu.main, menu)
+        return
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        var switcher = item?.itemId
+        if (switcher == R.id.action_sort_ascending) {
+
+        } else if (switcher == R.id.action_sort) {
+
+        }
+
+        return super.onOptionsItemSelected(item)
+
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
