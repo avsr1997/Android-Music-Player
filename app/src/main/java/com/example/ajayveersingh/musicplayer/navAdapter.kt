@@ -50,6 +50,7 @@ class navAdapter(_contentList: ArrayList<String>, _getImages: IntArray, _context
                 (context as MainActivity).supportFragmentManager.beginTransaction().replace(R.id.fragment, aboutusfragment).commit()
 
             }
+            MainActivity.statified.drawer_layout?.closeDrawers()
         })
 
     }

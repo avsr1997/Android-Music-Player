@@ -15,6 +15,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 
 class mainscreen_fragment : Fragment() {
+    var arraylist: ArrayList<Songs> = arrayListOf()
 
     var nowPlayingBottomBar: RelativeLayout? = null
     var playPauseButton: ImageButton? = null
@@ -37,31 +38,20 @@ class mainscreen_fragment : Fragment() {
         return view
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        menu?.clear()
-        inflater?.inflate(R.menu.main, menu)
-        return
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        var switcher = item?.itemId
-        if (switcher == R.id.action_sort_ascending) {
-
-        } else if (switcher == R.id.action_sort) {
-
-        }
-
-        return super.onOptionsItemSelected(item)
-
-    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         var songlist: ArrayList<Songs> = getSongsfromPhone()
-        mainscreenadapter = mainscreen_adapter(songlist as ArrayList<Songs>, myactivity as Context)
-        recyclerView?.layoutManager = LinearLayoutManager(myactivity)
-        recyclerView?.itemAnimator = DefaultItemAnimator()
-        recyclerView?.adapter = mainscreenadapter
+        if (songlist.isEmpty()) {
+            noSongs?.visibility = View.VISIBLE
+        } else {
+            visibleLayout?.visibility=View.VISIBLE
+            mainscreenadapter = mainscreen_adapter(songlist as ArrayList<Songs>, myactivity as Context)
+            recyclerView?.layoutManager = LinearLayoutManager(myactivity)
+            recyclerView?.itemAnimator = DefaultItemAnimator()
+            recyclerView?.adapter = mainscreenadapter
+        }
+
     }
 
     override fun onAttach(context: Context?) {
@@ -75,7 +65,7 @@ class mainscreen_fragment : Fragment() {
     }
 
     fun getSongsfromPhone(): ArrayList<Songs> {
-        var arraylist: ArrayList<Songs> = arrayListOf()
+
         var contentresolver = myactivity?.contentResolver
         var songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         var cursorSong = contentresolver?.query(songUri, null, null, null, null)

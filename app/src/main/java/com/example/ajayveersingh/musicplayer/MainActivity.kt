@@ -10,7 +10,10 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 
 class MainActivity : AppCompatActivity() {
-    var drawer_layout: DrawerLayout? = null
+    object statified {
+        var drawer_layout: DrawerLayout? = null
+    }
+
     var nav_drawer_list: ArrayList<String> = arrayListOf()
     var image_list: IntArray = intArrayOf(R.drawable.navigation_allsongs, R.drawable.navigation_favorites,
             R.drawable.navigation_settings, R.drawable.navigation_aboutus)
@@ -26,11 +29,11 @@ class MainActivity : AppCompatActivity() {
 
         var toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        drawer_layout = findViewById(R.id.drawer_layout)
+        statified.drawer_layout = findViewById(R.id.drawer_layout)
 
-        val toggle = ActionBarDrawerToggle(this@MainActivity, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        val toggle = ActionBarDrawerToggle(this@MainActivity, statified.drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         toggle.syncState()
-        drawer_layout?.addDrawerListener(toggle)
+        statified.drawer_layout?.addDrawerListener(toggle)
 
         var mainscreenfragment = mainscreen_fragment()
         this.supportFragmentManager.beginTransaction().add(R.id.fragment, mainscreenfragment, "MainScreenFragment").commit()

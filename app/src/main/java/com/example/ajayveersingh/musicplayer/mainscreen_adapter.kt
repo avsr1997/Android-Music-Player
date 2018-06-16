@@ -38,9 +38,11 @@ class mainscreen_adapter(_songDetails: ArrayList<Songs>, _context: Context) : Re
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+
         var songObject = songDetails?.get(position)
         holder.track_title?.text = songObject?.songTitle
         holder.track_artist?.text = songObject?.artist
+
         var args = Bundle()
         args.putString("songArtist", songObject?.artist)
         args.putString("path", songObject?.songData)
