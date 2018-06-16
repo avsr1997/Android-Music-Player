@@ -44,6 +44,11 @@ class songplaying_fragment : Fragment() {
     var currentposition: Int = 0
     var fetchsongs: ArrayList<Songs>? = null
 
+    object staticated {
+        val MY_PREFS_SHUFFLE = "Shuffle Feature"
+        val MY_PREFS_LOOP = "loop feature"
+    }
+
     var updatesongtime = object : Runnable {
         override fun run() {
             var getcurrent = mediaPlayer?.currentPosition
@@ -141,6 +146,32 @@ class songplaying_fragment : Fragment() {
         clickhandler()
         var visualizerHandler = DbmHandler.Factory.newVisualizerHandler(myactivity as Context, 0)
         audioVisualization?.linkTo(visualizerHandler)
+
+        var prefsForShuffle = myactivity?.getSharedPreferences(staticated.MY_PREFS_SHUFFLE, Context.MODE_PRIVATE)
+        var isShuffleAllowed = prefsForShuffle?.getBoolean("feature", false)
+        if (isShuffleAllowed as Boolean) {
+            currentSongHelper?.isshuffle = true
+            currentSongHelper?.isloop = false
+            shufflebutton?.setBackgroundResource(R.drawable.shuffle_icon)
+            loopbutton?.setBackgroundResource(R.drawable.loop_white_icon)
+
+        } else {
+            currentSongHelper?.isshuffle = false
+            shufflebutton?.setBackgroundResource(R.drawable.shuffle_white_icon)
+        }
+
+        var prefsForLoop = myactivity?.getSharedPreferences(staticated.MY_PREFS_SHUFFLE, Context.MODE_PRIVATE)
+        var isLoopAllowed = prefsForShuffle?.getBoolean("feature", false)
+        if (isShuffleAllowed as Boolean) {
+            currentSongHelper?.isshuffle = false
+            currentSongHelper?.isloop = true
+            shufflebutton?.setBackgroundResource(R.drawable.shuffle_white_icon)
+            loopbutton?.setBackgroundResource(R.drawable.loop_icon)
+
+        } else {
+            currentSongHelper?.isloop = false
+            loopbutton?.setBackgroundResource(R.drawable.loop_white_icon)
+        }
     }
 
     override fun onPause() {
@@ -161,28 +192,45 @@ class songplaying_fragment : Fragment() {
 
     fun clickhandler() {
         shufflebutton?.setOnClickListener({
+            var editorShuffle = myactivity?.getSharedPreferences(staticated.MY_PREFS_SHUFFLE, Context.MODE_PRIVATE)?.edit()
+            var editorLoop = myactivity?.getSharedPreferences(staticated.MY_PREFS_LOOP, Context.MODE_PRIVATE)?.edit()
             if (currentSongHelper?.isshuffle as Boolean) {
                 shufflebutton?.setBackgroundResource(R.drawable.shuffle_white_icon)
                 currentSongHelper?.isshuffle = false
+                editorShuffle?.putBoolean("feature", false)
+                editorShuffle?.apply()
             } else {
                 currentSongHelper?.isshuffle = true
                 currentSongHelper?.isloop = false
                 shufflebutton?.setBackgroundResource(R.drawable.shuffle_icon)
                 loopbutton?.setBackgroundResource(R.drawable.loop_white_icon)
                 currentSongHelper?.isshuffle = false
+                editorShuffle?.putBoolean("feature", true)
+                editorShuffle?.apply()
+                editorLoop?.putBoolean("feature", false)
+                editorLoop?.apply()
             }
 
         })
 
         loopbutton?.setOnClickListener({
+            var editorShuffle = myactivity?.getSharedPreferences(staticated.MY_PREFS_SHUFFLE, Context.MODE_PRIVATE)?.edit()
+            var editorLoop = myactivity?.getSharedPreferences(staticated.MY_PREFS_LOOP, Context.MODE_PRIVATE)?.edit()
+
             if (currentSongHelper?.isloop as Boolean) {
                 currentSongHelper?.isloop = false
                 loop_button?.setBackgroundResource(R.drawable.loop_white_icon)
+                editorLoop?.putBoolean("feature", false)
+                editorLoop?.apply()
             } else {
                 currentSongHelper?.isloop = true
                 currentSongHelper?.isshuffle = false
                 loop_button?.setBackgroundResource(R.drawable.loop_icon)
                 shufflebutton?.setBackgroundResource(R.drawable.shuffle_white_icon)
+                editorShuffle?.putBoolean("feature", false)
+                editorShuffle?.apply()
+                editorLoop?.putBoolean("feature", true)
+                editorLoop?.apply()
             }
         })
         nextbutton?.setOnClickListener({
