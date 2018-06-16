@@ -28,7 +28,8 @@ class songplaying_fragment : Fragment() {
 
     var myactivity: Activity? = null
     var mediaPlayer: MediaPlayer? = null
-
+    var audioVisualization: AudioVisualization? = null
+    var glview: GLAudioVisualizationView? = null
     var starttimetext: TextView? = null
     var endtimetext: TextView? = null
     var playpausebutton: ImageButton? = null
@@ -70,8 +71,14 @@ class songplaying_fragment : Fragment() {
         shufflebutton = view?.findViewById(R.id.shuffle_button)
         songTitleview = view?.findViewById(R.id.songTitle)
         songartistview = view?.findViewById(R.id.songArtist)
+        glview = view?.findViewById(R.id.visualizer_view)
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        audioVisualization = glview as AudioVisualization
     }
 
     override fun onAttach(context: Context?) {
@@ -132,6 +139,23 @@ class songplaying_fragment : Fragment() {
             onsongComplete()
         })
         clickhandler()
+        var visualizerHandler = DbmHandler.Factory.newVisualizerHandler(myactivity as Context, 0)
+        audioVisualization?.linkTo(visualizerHandler)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        audioVisualization?.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        audioVisualization?.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        audioVisualization?.release()
     }
 
 
