@@ -3,6 +3,7 @@ package com.example.ajayveersingh.musicplayer
 
 import android.app.Activity
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -44,12 +45,14 @@ class songplaying_fragment : Fragment() {
     var currentSongHelper: CurrentSongHelper? = null
     var currentposition: Int = 0
     var fetchsongs: ArrayList<Songs>? = null
+    var fab: ImageButton? = null
 
     object staticated {
         val MY_PREFS_SHUFFLE = "Shuffle Feature"
         val MY_PREFS_LOOP = "loop feature"
     }
 
+    var favoriteContent: favorite_database? = null
     var updatesongtime = object : Runnable {
         override fun run() {
             var getcurrent = mediaPlayer?.currentPosition
@@ -78,6 +81,7 @@ class songplaying_fragment : Fragment() {
         songTitleview = view?.findViewById(R.id.songTitle)
         songartistview = view?.findViewById(R.id.songArtist)
         glview = view?.findViewById(R.id.visualizer_view)
+        fab = view?.findViewById(R.id.favorites)
 
         return view
     }
@@ -99,6 +103,9 @@ class songplaying_fragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        favoriteContent = favorite_database(myactivity)
+
         currentSongHelper = CurrentSongHelper()
         currentSongHelper?.isplaying = true
         currentSongHelper?.isloop = false
@@ -176,6 +183,11 @@ class songplaying_fragment : Fragment() {
             currentSongHelper?.isloop = false
             loopbutton?.setBackgroundResource(R.drawable.loop_white_icon)
         }
+        /*if (favoriteContent?.checkidexists(currentSongHelper?.songID?.toInt() as Int) as Boolean) {
+            fab?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fab?.setBackgroundResource(R.drawable.favorite_off)
+        }*/
     }
 
 
@@ -196,6 +208,22 @@ class songplaying_fragment : Fragment() {
 
 
     fun clickhandler() {
+        fab?.setOnClickListener({
+            if (favoriteContent?.checkidexists(currentSongHelper?.songID?.toInt() as Int) as Boolean) {
+                fab?.setBackgroundResource(R.drawable.favorite_off)
+                favoriteContent?.deletesong_database(currentSongHelper?.songID as Int)
+                Toast.makeText(myactivity, "Removed from favorites", Toast.LENGTH_SHORT).show()
+            } else {
+                fab?.setBackgroundResource(R.drawable.favorite_on)
+                favoriteContent?.storefavoritesong(currentSongHelper?.songID?.toInt(),
+                        currentSongHelper?.songArtist, currentSongHelper?.songTitle, currentSongHelper?.songPath)
+                Toast.makeText(myactivity, "Added to favorites", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+
+
+
         shufflebutton?.setOnClickListener({
             var editorShuffle = myactivity?.getSharedPreferences(staticated.MY_PREFS_SHUFFLE, Context.MODE_PRIVATE)?.edit()
             var editorLoop = myactivity?.getSharedPreferences(staticated.MY_PREFS_LOOP, Context.MODE_PRIVATE)?.edit()
@@ -300,6 +328,11 @@ class songplaying_fragment : Fragment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        if (favoriteContent?.checkidexists(currentSongHelper?.songID?.toInt() as Int) as Boolean) {
+            fab?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fab?.setBackgroundResource(R.drawable.favorite_off)
+        }
     }
 
     fun playprevious() {
@@ -321,6 +354,11 @@ class songplaying_fragment : Fragment() {
             processInformation(mediaPlayer as MediaPlayer)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+        if (favoriteContent?.checkidexists(currentSongHelper?.songID?.toInt() as Int) as Boolean) {
+            fab?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fab?.setBackgroundResource(R.drawable.favorite_off)
         }
 
     }
@@ -354,6 +392,11 @@ class songplaying_fragment : Fragment() {
                 playnext(1)
                 currentSongHelper?.isplaying = true
             }
+        }
+        if (favoriteContent?.checkidexists(currentSongHelper?.songID?.toInt() as Int) as Boolean) {
+            fab?.setBackgroundResource(R.drawable.favorite_on)
+        } else {
+            fab?.setBackgroundResource(R.drawable.favorite_off)
         }
     }
 

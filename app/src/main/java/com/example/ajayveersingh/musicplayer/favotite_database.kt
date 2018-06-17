@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 class favorite_database : SQLiteOpenHelper {
-    val table_name = "favaorite_database"
+    val table_name = "favorite_database"
     val column_id = "song_id"
     val column_artist = "song_artist"
     val column_title = "song_title"
@@ -41,33 +41,46 @@ class favorite_database : SQLiteOpenHelper {
     }
 
     fun retrieve_database(): ArrayList<Songs>? {
-        val database = this.readableDatabase
-        var query_database = "SELECT * FROM " + table_name
-        var cursor = database.rawQuery(query_database, null)
-        do {
-            var _id = cursor.getInt(cursor.getColumnIndex(column_id))
-            var _title = cursor.getString(cursor.getColumnIndex(column_title))
-            var _data = cursor.getString(cursor.getColumnIndex(column_data))
-            var _artist = cursor.getString(cursor.getColumnIndex(column_artist))
-            songs_list?.add(Songs(_id as Long, _title, _artist, _data, 0))
-        } while (cursor.moveToNext())
+        try {
+            val database = this.readableDatabase
+            var query_database = "SELECT * FROM " + table_name
+            var cursor = database.rawQuery(query_database, null)
+            if (cursor.moveToFirst()) {
+                do {
+                    var _id = cursor.getInt(cursor.getColumnIndex(column_id))
+                    var _title = cursor.getString(cursor.getColumnIndex(column_title))
+                    var _data = cursor.getString(cursor.getColumnIndex(column_data))
+                    var _artist = cursor.getString(cursor.getColumnIndex(column_artist))
+                    songs_list?.add(Songs(_id as Long, _title, _artist, _data, 0))
+                } while (cursor.moveToNext())
+            } else {
+                return null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         return songs_list
     }
 
-    fun checkidexists(_id: Int): Boolean {
-        var store_id = -1090
+    fun checkidexists(id: Int): Boolean {
+        var checker: Boolean = false
+        var local_id: Int = 0
         var database = this.readableDatabase
-        var query_database = "SELECT * FROM " + table_name + "WHERE SongId = '$_id'"
+        var query_database = "SELECT * FROM " + table_name + "WHERE column_id = '$id'"
         var cursor = database.rawQuery(query_database, null)
-        if (cursor.moveToFirst()) {
-            do {
-                store_id = cursor.getInt(cursor.getColumnIndex(column_id))
-            } while (cursor.moveToNext())
-        } else {
-            return false
-        }
-        return store_id != -1090
+        cursor.moveToFirst()
+        do {
+            local_id = cursor.getInt(cursor.getColumnIndex(column_id))
+            if (id == local_id) {
+                checker = true
+                break
+            } else {
+                continue
+            }
+        } while (cursor.moveToNext())
+        return checker
     }
+
 
     fun deletesong_database(_id: Int) {
         val db = this.writableDatabase
