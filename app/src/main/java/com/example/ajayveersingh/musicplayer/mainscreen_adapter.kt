@@ -40,15 +40,16 @@ class mainscreen_adapter(_songDetails: ArrayList<Songs>, _context: Context) : Re
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
 
         var songObject = songDetails?.get(position)
-        holder.track_title?.text = songObject?.songTitle
-        holder.track_artist?.text = songObject?.artist
+
+        holder.track_title?.setText(songObject?.songTitle)
+        holder.track_artist?.setText(songObject?.artist)
 
         var args = Bundle()
         args.putString("songArtist", songObject?.artist)
         args.putString("path", songObject?.songData)
         args.putString("songTitle", songObject?.songTitle)
         args.putInt("songId", songObject?.songID?.toInt() as Int)
-        args.putInt("songPosition", position)
+        args.putInt("songPosition", holder.adapterPosition)
         args.putParcelableArrayList("songData", songDetails)
 
         holder.contentHolder?.setOnClickListener({
@@ -71,5 +72,3 @@ class mainscreen_adapter(_songDetails: ArrayList<Songs>, _context: Context) : Re
         }
     }
 }
-
-

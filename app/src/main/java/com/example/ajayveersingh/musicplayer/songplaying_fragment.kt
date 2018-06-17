@@ -14,6 +14,7 @@ import android.view.*
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import com.cleveroad.audiovisualization.AudioVisualization
 import com.cleveroad.audiovisualization.DbmHandler
 import com.cleveroad.audiovisualization.GLAudioVisualizationView
@@ -143,6 +144,9 @@ class songplaying_fragment : Fragment() {
         mediaPlayer?.setOnCompletionListener({
             onsongComplete()
         })
+
+
+
         clickhandler()
         var visualizerHandler = DbmHandler.Factory.newVisualizerHandler(myactivity as Context, 0)
         audioVisualization?.linkTo(visualizerHandler)
@@ -174,6 +178,7 @@ class songplaying_fragment : Fragment() {
         }
     }
 
+
     override fun onPause() {
         super.onPause()
         audioVisualization?.onPause()
@@ -204,7 +209,6 @@ class songplaying_fragment : Fragment() {
                 currentSongHelper?.isloop = false
                 shufflebutton?.setBackgroundResource(R.drawable.shuffle_icon)
                 loopbutton?.setBackgroundResource(R.drawable.loop_white_icon)
-                currentSongHelper?.isshuffle = false
                 editorShuffle?.putBoolean("feature", true)
                 editorShuffle?.apply()
                 editorLoop?.putBoolean("feature", false)
@@ -234,19 +238,28 @@ class songplaying_fragment : Fragment() {
             }
         })
         nextbutton?.setOnClickListener({
-            currentSongHelper?.isplaying = true
-            if (currentSongHelper?.isshuffle as Boolean) {
-                playnext("PlayNextLikeNormalShuffle")
+            //currentSongHelper?.isplaying = true
+            if (currentposition == (fetchsongs?.size!! - 1)) {
+                Toast.makeText(myactivity, "Last Song", Toast.LENGTH_SHORT).show()
             } else {
-                playnext("PlayNextNormal ")
+                if (currentSongHelper?.isshuffle as Boolean) {
+                    playnext(2)
+                } else {
+                    playnext(1)
+                }
             }
         })
         previousbutton?.setOnClickListener({
             currentSongHelper?.isplaying = true
-            if (currentSongHelper?.isloop as Boolean) {
-                loopbutton?.setBackgroundResource(R.drawable.loop_white_icon)
+            if (currentposition == 0) {
+                Toast.makeText(myactivity, "No Previous", Toast.LENGTH_SHORT).show()
+            } else {
+                if (currentSongHelper?.isloop as Boolean) {
+                    loopbutton?.setBackgroundResource(R.drawable.loop_white_icon)
+                } else {
+                    playprevious()
+                }
             }
-            playprevious()
         })
         playpausebutton?.setOnClickListener({
             if (mediaPlayer?.isPlaying as Boolean) {
@@ -262,26 +275,22 @@ class songplaying_fragment : Fragment() {
     }
 
 
-    fun playnext(check: String) {
-        if (check.equals("PlayNextNormal", true)) {
+    fun playnext(check: Int) {
+        if (check == 1) {
             currentposition += 1
-        } else if (check.equals("PlayNextLikeNormalShuffle", true)) {
+        } else if (check == 2) {
             var random = Random()
             var randomposition = random.nextInt(fetchsongs?.size?.plus(1) as Int)
             currentposition = randomposition
+            currentSongHelper?.isloop = false
         }
-        if (currentposition == fetchsongs?.size) {
-            currentposition = 0
-        }
-        currentSongHelper?.isloop = false
         var nextsong = fetchsongs?.get(currentposition)
         currentSongHelper?.currentPosition = currentposition
         currentSongHelper?.songPath = nextsong?.songData
-        currentSongHelper?.songID = (nextsong?.songID as Int).toLong()
+        currentSongHelper?.songID = nextsong?.songID as Long
         currentSongHelper?.songTitle = nextsong?.songTitle
         currentSongHelper?.songArtist = nextsong?.artist
         updateTextViews(currentSongHelper?.songTitle as String, currentSongHelper?.songArtist as String)
-
         mediaPlayer?.reset()
         try {
             mediaPlayer?.setDataSource(myactivity, Uri.parse(currentSongHelper?.songPath))
@@ -295,20 +304,11 @@ class songplaying_fragment : Fragment() {
 
     fun playprevious() {
         currentposition -= 1
-        if (currentposition == -1) {
-            currentposition == 0
-        }
-        if (currentSongHelper?.isplaying as Boolean) {
-            playpausebutton?.setBackgroundResource(R.drawable.pause_icon)
-        } else {
-            playpausebutton?.setBackgroundResource(R.drawable.play_icon)
-        }
         currentSongHelper?.isloop = false
-
         var nextsong = fetchsongs?.get(currentposition)
         currentSongHelper?.currentPosition = currentposition
         currentSongHelper?.songPath = nextsong?.songData
-        currentSongHelper?.songID = (nextsong?.songID as Int).toLong()
+        currentSongHelper?.songID = nextsong?.songID as Long
         currentSongHelper?.songTitle = nextsong?.songTitle
         currentSongHelper?.songArtist = nextsong?.artist
         updateTextViews(currentSongHelper?.songTitle as String, currentSongHelper?.songArtist as String)
@@ -327,7 +327,7 @@ class songplaying_fragment : Fragment() {
 
     fun onsongComplete() {
         if (currentSongHelper?.isshuffle as Boolean) {
-            playnext("PlayNextLikeNormalShuffle")
+            playnext(2)
             currentSongHelper?.isplaying = true
         } else {
             if (currentSongHelper?.isloop as Boolean) {
@@ -335,7 +335,7 @@ class songplaying_fragment : Fragment() {
                 var nextsong = fetchsongs?.get(currentposition)
                 currentSongHelper?.currentPosition = currentposition
                 currentSongHelper?.songPath = nextsong?.songData
-                currentSongHelper?.songID = (nextsong?.songID as Int).toLong()
+                currentSongHelper?.songID = nextsong?.songID as Long
                 currentSongHelper?.songTitle = nextsong?.songTitle
                 currentSongHelper?.songArtist = nextsong?.artist
                 updateTextViews(currentSongHelper?.songTitle as String, currentSongHelper?.songArtist as String)
@@ -351,7 +351,7 @@ class songplaying_fragment : Fragment() {
                 }
 
             } else {
-                playnext("PlayNextNormal")
+                playnext(1)
                 currentSongHelper?.isplaying = true
             }
         }

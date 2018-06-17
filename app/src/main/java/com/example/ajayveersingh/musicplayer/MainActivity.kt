@@ -45,6 +45,6 @@ class MainActivity : AppCompatActivity() {
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.itemAnimator = DefaultItemAnimator()
         recycler_view.adapter = objnavAdapter
-        recycler_view.hasFixedSize()
+        recycler_view.setHasFixedSize(true)
     }
 }

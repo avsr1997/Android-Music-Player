@@ -45,11 +45,14 @@ class mainscreen_fragment : Fragment() {
         if (songlist.isEmpty()) {
             noSongs?.visibility = View.VISIBLE
         } else {
-            visibleLayout?.visibility=View.VISIBLE
             mainscreenadapter = mainscreen_adapter(songlist as ArrayList<Songs>, myactivity as Context)
-            recyclerView?.layoutManager = LinearLayoutManager(myactivity)
+            mainscreenadapter?.notifyDataSetChanged()
+            var linearLayoutManager = LinearLayoutManager(myactivity as Context)
+            linearLayoutManager.orientation = LinearLayoutManager.VERTICAL
+            recyclerView?.layoutManager = linearLayoutManager
             recyclerView?.itemAnimator = DefaultItemAnimator()
             recyclerView?.adapter = mainscreenadapter
+            recyclerView?.setHasFixedSize(true)
         }
 
     }
@@ -75,14 +78,14 @@ class mainscreen_fragment : Fragment() {
             val songArtist = cursorSong.getColumnIndex(MediaStore.Audio.Media.ARTIST)
             val songData = cursorSong.getColumnIndex(MediaStore.Audio.Media.DATA)
             val songDate = cursorSong.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED)
-            while (cursorSong.moveToNext()) {
+            do {
                 var currentId = cursorSong.getLong(songID)
                 var currentTitle = cursorSong.getString(songTitle)
                 var currentArtist = cursorSong.getString(songArtist)
                 var currentData = cursorSong.getString(songData)
                 var currentDate = cursorSong.getLong(songDate)
                 arraylist.add(Songs(currentId, currentTitle, currentArtist, currentData, currentDate))
-            }
+            } while (cursorSong.moveToNext())
         }
         return arraylist
     }
