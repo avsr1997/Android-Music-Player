@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.provider.MediaStore
 
 class favorite_database : SQLiteOpenHelper {
     val table_name = "favorite_database"
@@ -21,8 +22,8 @@ class favorite_database : SQLiteOpenHelper {
     constructor(context: Context?) : super(context, static.database_name, null, 1)
 
     override fun onCreate(db: SQLiteDatabase?) {
-        db?.execSQL("CREATE TABLE " + table_name + "( " + column_id + "INTEGER," + column_artist + "STRING,"
-                + column_title + "STRING," + column_data + "STRING);")
+        db?.execSQL("CREATE TABLE " + table_name + "( " + column_id + " INTEGER," + column_artist + " STRING,"
+                + column_title + " STRING," + column_data + " STRING" + ");")
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -64,20 +65,22 @@ class favorite_database : SQLiteOpenHelper {
 
     fun checkidexists(id: Int): Boolean {
         var checker: Boolean = false
-        var local_id: Int = 0
         var database = this.readableDatabase
-        var query_database = "SELECT * FROM " + table_name + "WHERE column_id = '$id'"
+        var query_database = "SELECT * FROM " + table_name + " WHERE " + column_id + "= '$id'"
         var cursor = database.rawQuery(query_database, null)
-        cursor.moveToFirst()
-        do {
-            local_id = cursor.getInt(cursor.getColumnIndex(column_id))
-            if (id == local_id) {
-                checker = true
-                break
-            } else {
-                continue
-            }
-        } while (cursor.moveToNext())
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                var local_id = cursor.getInt(cursor.getColumnIndexOrThrow(column_id))
+                if (id == local_id) {
+                    checker = true
+                    break
+                } else {
+                    continue
+                }
+            } while (cursor.moveToNext())
+        } else {
+            return false
+        }
         return checker
     }
 

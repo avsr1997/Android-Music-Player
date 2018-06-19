@@ -18,7 +18,7 @@
         </android.support.v7.widget.RecyclerView>
 
         <RelativeLayout
-            android:id="@+id/bottom_bar"
+            android:id="@+id/bottom_bar1"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_alignParentBottom="true"
@@ -60,10 +60,9 @@
                 android:layout_height="wrap_content"
                 android:layout_alignLeft="@+id/now_playing"
                 android:layout_below="@+id/now_playing"
+                android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
-                android:layout_toLeftOf="@+id/song_photo"
                 android:layout_toRightOf="@+id/song_photo"
-                android:ellipsize="end"
                 android:maxLines="1"
                 android:maxWidth="160dp"
                 android:text="....."

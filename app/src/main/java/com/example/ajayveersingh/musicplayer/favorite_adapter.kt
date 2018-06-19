@@ -40,6 +40,7 @@ class favoriteadapter(_songDetails: ArrayList<Songs>, _context: Context) : Recyc
         holder.track_title?.text = songObject?.songTitle
         holder.track_artist?.text = songObject?.artist
         var args = Bundle()
+        val songplayingfragment = songplaying_fragment()
         args.putString("songArtist", songObject?.artist)
         args.putString("path", songObject?.songData)
         args.putString("songTitle", songObject?.songTitle)
@@ -48,7 +49,6 @@ class favoriteadapter(_songDetails: ArrayList<Songs>, _context: Context) : Recyc
         args.putParcelableArrayList("songData", songDetails)
 
         holder.contentHolder?.setOnClickListener({
-            val songplayingfragment = songplaying_fragment()
             songplayingfragment.arguments = args
             (mcontext as FragmentActivity).supportFragmentManager.beginTransaction().replace(R.id.fragment, songplayingfragment).commit()
 
