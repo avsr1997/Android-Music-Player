@@ -1,6 +1,9 @@
 package com.example.ajayveersingh.musicplayer
 
 import android.content.Context
+import android.provider.MediaStore
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -67,4 +70,5 @@ class navAdapter(_contentList: ArrayList<String>, _getImages: IntArray, _context
 
         }
     }
+
 }

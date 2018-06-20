@@ -26,12 +26,13 @@ class favrouites_fragment : Fragment() {
     var getSongslist: ArrayList<Songs>? = null
     var arraylist: ArrayList<Songs> = arrayListOf()
     var newarray: ArrayList<Songs> = arrayListOf()
-    var noFavorites: TextView? = null
     var nowPlayingBottomBar: RelativeLayout? = null
     var playpausebutton: ImageButton? = null
     var songtitle: TextView? = null
-    var recyclerview: RecyclerView? = null
     var trackposition: Int = 0
+    var noFavorites: TextView? = null
+    var recyclerview: RecyclerView? = null
+
 
     object Statified {
         var mediaplayer: MediaPlayer? = null
